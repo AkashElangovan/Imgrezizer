@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Image Resizer (Aspect-Ratio Safe)</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f2f2f2;
+      padding: 2em;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+    }
+
+    h2 {
+      margin-bottom: 1rem;
+      color: #333;
+    }
+
+    .card {
+      background: white;
+      padding: 2em;
+      border-radius: 10px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+    }
+
+    input[type="file"],
+    input[type="number"] {
+      padding: 0.5em;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      margin: 0.5em 0;
+      width: 80%;
+    }
+
+    button {
+      margin-top: 1em;
+      padding: 0.7em 1.5em;
+      border: none;
+      border-radius: 5px;
+      background-color: #4CAF50;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    canvas {
+      margin-top: 1.5em;
+      border: 1px solid #ccc;
+      background: white;
+      border-radius: 8px;
+      max-width: 100%;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    footer {
+      margin-top: 2em;
+      font-size: 0.9em;
+      color: #555;
+      text-align: center;
+      max-width: 500px;
+    }
+
+    footer a {
+      color: #007BFF;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>🖼️ Image Resizer (No Deformation)</h2>
+
+    <input type="file" id="imageInput" accept="image/*"><br>
+    <input type="number" id="targetWidth" placeholder="Width (e.g., 190)">
+    <input type="number" id="targetHeight" placeholder="Height (e.g., 210)"><br>
+
+    <button onclick="resizeImage()">Resize Image</button>
+    <button id="downloadBtn" class="hidden" onclick="downloadImage()">Download Resized Image</button>
+
+    <canvas id="canvas" class="hidden"></canvas>
+  </div>
+
+  <footer>
+    🔒 All image processing is done 100% on the <strong>client-side</strong> — nothing gets uploaded.  
+    You can freely use or modify this on your system.  
+    🌐 Source code available on <a href="https://github.com/AkashElangovan/Imgrezizer" target="_blank">GitHub</a>.
+  </footer>
+
+  <script>
+    let originalImage = new Image();
+
+    document.getElementById('imageInput').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        originalImage.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    function resizeImage() {
+      const targetWidth = parseInt(document.getElementById('targetWidth').value);
+      const targetHeight = parseInt(document.getElementById('targetHeight').value);
+
+      if (!originalImage.src || isNaN(targetWidth) || isNaN(targetHeight)) {
+        alert("Please select an image and enter valid dimensions.");
+        return;
+      }
+
+      originalImage.onload = () => {
+        const scale = Math.min(targetWidth / originalImage.width, targetHeight / originalImage.height);
+        const scaledWidth = originalImage.width * scale;
+        const scaledHeight = originalImage.height * scale;
+
+        const padX = (targetWidth - scaledWidth) / 2;
+        const padY = (targetHeight - scaledHeight) / 2;
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+
+        ctx.fillStyle = "#ffffff"; // Background padding color
+        ctx.fillRect(0, 0, targetWidth, targetHeight);
+        ctx.drawImage(originalImage, padX, padY, scaledWidth, scaledHeight);
+
+        canvas.classList.remove("hidden");
+        document.getElementById("downloadBtn").classList.remove("hidden");
+      };
+
+      if (originalImage.complete) {
+        originalImage.onload();
+      }
+    }
+
+    function downloadImage() {
+      const canvas = document.getElementById('canvas');
+      const link = document.createElement('a');
+      link.download = 'resized-image.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+  </script>
+</body>
+</html>
