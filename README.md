@@ -18,8 +18,8 @@
 ## 🖥️ Demo
 
 Try it by opening the [`index.html`](./index.html) file directly in your browser.
-
-# Or [Visit herer](https://akashelangovan.github.io/imgrezizer/)
+or
+# [Visit here](https://akashelangovan.github.io/imgrezizer/)
 
 ---
 
